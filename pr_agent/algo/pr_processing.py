@@ -494,8 +494,8 @@ def get_pr_multi_diffs(git_provider: GitProvider,
 
     # Add the last chunk
     if patches:
-        final_diff = "\n".join(patches)
-        final_diff_list.append(final_diff.strip())
+        #final_diff = "\n".join(patches)
+        final_diff_list.extend(patches)
 
     return final_diff_list
 

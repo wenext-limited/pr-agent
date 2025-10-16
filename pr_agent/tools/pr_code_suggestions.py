@@ -384,6 +384,7 @@ class PRCodeSuggestions:
         return data
 
     async def _get_prediction(self, model: str, patches_diff: str, patches_diff_no_line_number: str) -> dict:
+        get_logger().info(f"model:{model} patches_diff:{patches_diff}")
         variables = copy.deepcopy(self.vars)
         variables["diff"] = patches_diff  # update diff
         variables["diff_no_line_numbers"] = patches_diff_no_line_number  # update diff
