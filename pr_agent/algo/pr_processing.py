@@ -69,77 +69,8 @@ def get_pr_diff(git_provider: GitProvider, token_handler: TokenHandler,
         pr_languages, token_handler, add_line_numbers_to_hunks,
         patch_extra_lines_before=PATCH_EXTRA_LINES_BEFORE, patch_extra_lines_after=PATCH_EXTRA_LINES_AFTER)
 
-    # if we are under the limit, return the full diff
-    if total_tokens + OUTPUT_BUFFER_TOKENS_SOFT_THRESHOLD < get_max_tokens(model):
-        get_logger().info(f"Tokens: {total_tokens}, total tokens under limit: {get_max_tokens(model)}, "
-                          f"returning full diff.")
-        return "\n".join(patches_extended)
-
-    # if we are over the limit, start pruning (If we got here, we will not extend the patches with extra lines)
-    get_logger().info(f"Tokens: {total_tokens}, total tokens over limit: {get_max_tokens(model)}, "
-                      f"pruning diff.")
-    patches_compressed_list, total_tokens_list, deleted_files_list, remaining_files_list, file_dict, files_in_patches_list = \
-        pr_generate_compressed_diff(pr_languages, token_handler, model, add_line_numbers_to_hunks, large_pr_handling)
-
-    if large_pr_handling and len(patches_compressed_list) > 1:
-        get_logger().info(f"Large PR handling mode, and found {len(patches_compressed_list)} patches with original diff.")
-        return "" # return empty string, as we want to generate multiple patches with a different prompt
-
-    # return the first patch
-    patches_compressed = patches_compressed_list[0]
-    total_tokens_new = total_tokens_list[0]
-    files_in_patch = files_in_patches_list[0]
-
-    # Insert additional information about added, modified, and deleted files if there is enough space
-    max_tokens = get_max_tokens(model) - OUTPUT_BUFFER_TOKENS_HARD_THRESHOLD
-    curr_token = total_tokens_new  # == token_handler.count_tokens(final_diff)+token_handler.prompt_tokens
-    final_diff = "\n".join(patches_compressed)
-    delta_tokens = 10
-    added_list_str = modified_list_str = deleted_list_str = ""
-    unprocessed_files = []
-    # generate the added, modified, and deleted files lists
-    if (max_tokens - curr_token) > delta_tokens:
-        for filename, file_values in file_dict.items():
-            if filename in files_in_patch:
-                continue
-            if file_values['edit_type'] == EDIT_TYPE.ADDED:
-                unprocessed_files.append(filename)
-                if not added_list_str:
-                    added_list_str = ADDED_FILES_ + f"\n{filename}"
-                else:
-                    added_list_str = added_list_str + f"\n{filename}"
-            elif file_values['edit_type'] in [EDIT_TYPE.MODIFIED, EDIT_TYPE.RENAMED]:
-                unprocessed_files.append(filename)
-                if not modified_list_str:
-                    modified_list_str = MORE_MODIFIED_FILES_ + f"\n{filename}"
-                else:
-                    modified_list_str = modified_list_str + f"\n{filename}"
-            elif file_values['edit_type'] == EDIT_TYPE.DELETED:
-                # unprocessed_files.append(filename) # not needed here, because the file was deleted, so no need to process it
-                if not deleted_list_str:
-                    deleted_list_str = DELETED_FILES_ + f"\n{filename}"
-                else:
-                    deleted_list_str = deleted_list_str + f"\n{filename}"
-
-    # prune the added, modified, and deleted files lists, and add them to the final diff
-    added_list_str = clip_tokens(added_list_str, max_tokens - curr_token)
-    if added_list_str:
-        final_diff = final_diff + "\n\n" + added_list_str
-        curr_token += token_handler.count_tokens(added_list_str) + 2
-    modified_list_str = clip_tokens(modified_list_str, max_tokens - curr_token)
-    if modified_list_str:
-        final_diff = final_diff + "\n\n" + modified_list_str
-        curr_token += token_handler.count_tokens(modified_list_str) + 2
-    deleted_list_str = clip_tokens(deleted_list_str, max_tokens - curr_token)
-    if deleted_list_str:
-        final_diff = final_diff + "\n\n" + deleted_list_str
-
-    get_logger().debug(f"After pruning, added_list_str: {added_list_str}, modified_list_str: {modified_list_str}, "
-                       f"deleted_list_str: {deleted_list_str}")
-    if not return_remaining_files:
-        return final_diff
-    else:
-        return final_diff, remaining_files_list
+    get_logger().info(f"Total tokens in extended PR diff: {total_tokens} patches_extended:{len(patches_extended)}")
+    return patches_extended
 
 
 def get_pr_diff_multiple_patchs(git_provider: GitProvider, token_handler: TokenHandler, model: str,
