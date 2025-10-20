@@ -48,12 +48,7 @@ def _build_args(payload: Dict[str, Any]) -> List[str]:
 
 
 def _spawn_cli(args: List[str], extra_env: Dict[str, str] | None = None) -> int:
-    popen_kwargs: Dict[str, Any] = {
-        "stdin": subprocess.DEVNULL,
-        "stdout": subprocess.DEVNULL,
-        "stderr": subprocess.DEVNULL,
-        "close_fds": True,
-    }
+
     if os.name == "nt":
         popen_kwargs["creationflags"] = 0x00000008 | 0x00000200
     else:
@@ -65,7 +60,7 @@ def _spawn_cli(args: List[str], extra_env: Dict[str, str] | None = None) -> int:
             if v is not None:
                 env[str(k)] = str(v)
 
-    proc = subprocess.Popen([sys.executable, "pr_agent/cli.py", *args], env=env, **popen_kwargs)
+    proc = subprocess.Popen([sys.executable, "pr_agent/cli.py", *args], env=env)
     return proc.pid
 
 
