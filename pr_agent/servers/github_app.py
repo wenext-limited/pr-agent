@@ -335,9 +335,10 @@ async def handle_request(body: Dict[str, Any], event: str):
         get_logger().debug(f"Request ignored: PR logic filtering")
         return {}
 
-    #if 'check_run' in body:  # handle failed checks
-        # get_logger().debug(f'Request body', artifact=body, event=event) # added inside handle_checks
-    #    pass
+    if 'check_run' in body:  # handle failed checks
+        get_logger().debug(f'Request body', artifact=body, event=event) # added inside handle_checks
+        pass
+    
     # handle comments on PRs
     if action == 'created':
         get_logger().debug(f'Request body', artifact=body, event=event)
