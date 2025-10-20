@@ -339,7 +339,7 @@ async def handle_request(body: Dict[str, Any], event: str):
         # get_logger().debug(f'Request body', artifact=body, event=event) # added inside handle_checks
     #    pass
     # handle comments on PRs
-    elif action == 'created':
+    if action == 'created':
         get_logger().debug(f'Request body', artifact=body, event=event)
         await handle_comments_on_pr(body, event, sender, sender_id, action, log_context, agent)
     # handle new PRs
