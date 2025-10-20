@@ -54,6 +54,7 @@ async def handle_github_webhooks(background_tasks: BackgroundTasks, request: Req
     return {}
 
 
+
 @router.post("/api/v1/marketplace_webhooks")
 async def handle_marketplace_webhooks(request: Request, response: Response):
     body = await get_body(request)
@@ -329,14 +330,14 @@ async def handle_request(body: Dict[str, Any], event: str):
     if is_bot_user(sender, sender_type) and 'check_run' not in body:
         get_logger().debug(f"Request ignored: bot user detected")
         return {}
-    if action != 'created' and 'check_run' not in body:
-        if not should_process_pr_logic(body):
-            get_logger().debug(f"Request ignored: PR logic filtering")
-            return {}
 
-    if 'check_run' in body:  # handle failed checks
+    if not should_process_pr_logic(body):
+        get_logger().debug(f"Request ignored: PR logic filtering")
+        return {}
+
+    #if 'check_run' in body:  # handle failed checks
         # get_logger().debug(f'Request body', artifact=body, event=event) # added inside handle_checks
-        pass
+    #    pass
     # handle comments on PRs
     elif action == 'created':
         get_logger().debug(f'Request body', artifact=body, event=event)
