@@ -19,7 +19,7 @@ setup_logger(log_level)
 
 app = FastAPI()
 
-#python pr_agent/cli.py improve --pr_url https://github.com/wenext-limited/game-platform/pull/64  --num_max_findings=10
+#python pr_agent/cli.py  --pr_url https://github.com/wenext-limited/game-platform/pull/64  improve --num_max_findings=10
 
 
 def _build_args(payload: Dict[str, Any]) -> List[str]:
@@ -31,10 +31,10 @@ def _build_args(payload: Dict[str, Any]) -> List[str]:
 
     # 默认使用示例中的命令 improve；也可通过 body 指定其他命令
     command = str(payload.get("command", "improve"))
-    args.append(command)
 
-    # 必填参数
+    # 先放必填参数 --pr_url，再放命令，再放其余参数，匹配示例顺序
     args.append(f"--pr_url={pr_url}")
+    args.append(command)
 
     # 其他透传参数
     rest = payload.get("rest", [])
