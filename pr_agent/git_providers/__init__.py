@@ -13,6 +13,7 @@ from pr_agent.git_providers.github_provider import GithubProvider
 from pr_agent.git_providers.gitlab_provider import GitLabProvider
 from pr_agent.git_providers.local_git_provider import LocalGitProvider
 from pr_agent.git_providers.gitea_provider import GiteaProvider
+from ..log import get_logger
 
 _GIT_PROVIDERS = {
     'github': GithubProvider,
@@ -57,6 +58,7 @@ def get_git_provider_with_context(pr_url) -> GitProvider:
     else:
         try:
             provider_id = get_settings().config.git_provider
+            get_logger().info(f"get_git_provider_with_context provider_id: {provider_id} _GIT_PROVIDERS:{_GIT_PROVIDERS}")
             if provider_id not in _GIT_PROVIDERS:
                 raise ValueError(f"Unknown git provider: {provider_id}")
             git_provider = _GIT_PROVIDERS[provider_id](pr_url)
