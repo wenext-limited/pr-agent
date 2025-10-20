@@ -11,6 +11,12 @@ from typing import Any, Dict, List
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 
+from pr_agent.log import get_logger, setup_logger
+
+log_level = os.environ.get("LOG_LEVEL", "INFO")
+setup_logger(log_level)
+
+
 app = FastAPI()
 
 #python pr_agent/cli.py improve --pr_url https://github.com/wenext-limited/game-platform/pull/64  --num_max_findings=10
@@ -65,6 +71,7 @@ def _spawn_cli(args: List[str], extra_env: Dict[str, str] | None = None) -> int:
 
 @app.post("/invoke")
 async def invoke(request: Request):
+    get_logger().info(f"Received request {request}")
     payload = await request.json()
     args = _build_args(payload)
 
@@ -98,8 +105,10 @@ async def invoke(request: Request):
     except Exception:
         # 忽略目录不存在等异常
         pass
-
+    
+    
     pid = _spawn_cli(args, extra_env=extra_env)
+    get_logger().info(f"Received request args:{args} extra_env:{extra_env} sunprocess pid:{pid}")
     return JSONResponse(status_code=202, content={"status": "accepted", "pid": pid})
 
 
