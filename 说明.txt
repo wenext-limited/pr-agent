@@ -1,0 +1,6 @@
+编译
+cd /data1/code/pr-agent
+docker build -f docker/Dockerfile.proxy  -t pr-agent:github-app .
+
+部署
+docker run -d --rm -it -p 8000:8000 -v /data1/code/pr_agent_config:/app/config:ro  docker.io/library/pr-agent:github-app 
