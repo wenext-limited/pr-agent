@@ -11,6 +11,7 @@ regex = [
     # See https://learnbyexample.github.io/python-regex-cheatsheet/
     # for example: regex = ['.*\.toml$']
     '.*\.yml$',
+    '.*\.xml$',
     '.*\.json$',
     '.*\.conf$',
     '.*\.pem$',
